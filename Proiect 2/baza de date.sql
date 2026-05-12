@@ -1,0 +1,1 @@
+UPDATE "Users" SET "PasswordHash" = 'Password123!';
