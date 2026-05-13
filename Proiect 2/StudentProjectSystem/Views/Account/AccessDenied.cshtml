@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Acces Refuzat";
+}
+
+<div class="empty-state">
+    <i class="fas fa-ban"></i>
+    <h3>Acces Refuzat</h3>
+    <p>Nu ai permisiunea să accesezi această pagină.</p>
+    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i> Înapoi la Login
+    </a>
+</div>
