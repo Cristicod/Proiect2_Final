@@ -1,0 +1,83 @@
+@model StudentDashboardViewModel
+@{ ViewData["Title"] = "Dashboard Student"; }
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-folder-open"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.TotalProjects</div>
+            <div class="stat-label">Total Proiecte</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.GradedProjects</div>
+            <div class="stat-label">Evaluate</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.PendingProjects</div>
+            <div class="stat-label">În așteptare</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-star"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@(Model.AverageGrade.HasValue ? Model.AverageGrade.Value.ToString("F2") : "—")</div>
+            <div class="stat-label">Media notelor</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.UnreadNotifications > 0)
+{
+    <div class="alert alert-info">
+        <i class="fas fa-bell"></i>
+        Ai <strong>@Model.UnreadNotifications</strong> notificări necitite.
+        <a asp-action="Notifications">Vizualizează</a>
+    </div>
+}
+
+<div class="section-header">
+    <h3><i class="fas fa-clock-rotate-left"></i> Proiecte recente</h3>
+    <a asp-action="Upload" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Proiect nou</a>
+</div>
+
+@if (!Model.RecentProjects.Any())
+{
+    <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>Nu ai proiecte încărcate</h3>
+        <p>Începe prin a încărca primul tău proiect!</p>
+        <a asp-action="Upload" class="btn btn-primary"><i class="fas fa-upload"></i> Încarcă proiect</a>
+    </div>
+}
+else
+{
+    <div class="projects-grid">
+        @foreach (var p in Model.RecentProjects)
+        {
+            <div class="project-card">
+                <div class="project-card-header">
+                    <span class="status-badge status-@p.Status.ToLower()">@p.Status</span>
+                    @if (p.Grade != null)
+                    {
+                        <span class="grade-badge">@p.Grade.Score<small>/10</small></span>
+                    }
+                </div>
+                <h4 class="project-title">@p.Title</h4>
+                <p class="project-desc">@(p.Description.Length > 100 ? p.Description[..100] + "…" : p.Description)</p>
+                <div class="project-meta">
+                    <span><i class="fas fa-calendar"></i> @p.UploadDate.ToString("dd.MM.yyyy")</span>
+                    @if (p.FileName != null) { <span><i class="fas fa-paperclip"></i> Fișier atașat</span> }
+                </div>
+                <a asp-action="ProjectDetails" asp-route-id="@p.ProjectId" class="btn btn-outline btn-sm">
+                    <i class="fas fa-eye"></i> Detalii
+                </a>
+            </div>
+        }
+    </div>
+}

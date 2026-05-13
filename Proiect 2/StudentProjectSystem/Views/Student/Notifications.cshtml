@@ -1,0 +1,32 @@
+@model IEnumerable<Notification>
+@{ ViewData["Title"] = "Notificări"; }
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="fas fa-bell-slash"></i>
+        <h3>Nicio notificare</h3>
+        <p>Nu ai notificări momentan.</p>
+    </div>
+}
+else
+{
+    <div class="notifications-list">
+        @foreach (var n in Model)
+        {
+            <div class="notification-item @(n.IsRead ? "" : "unread")">
+                <div class="notif-icon"><i class="fas fa-bell"></i></div>
+                <div class="notif-body">
+                    <p>@n.Message</p>
+                    <time>@n.CreatedAt.ToString("dd.MM.yyyy HH:mm")</time>
+                </div>
+                @if (n.ProjectId.HasValue)
+                {
+                    <a asp-action="ProjectDetails" asp-route-id="@n.ProjectId" class="btn btn-outline btn-xs">
+                        <i class="fas fa-eye"></i> Vezi
+                    </a>
+                }
+            </div>
+        }
+    </div>
+}
