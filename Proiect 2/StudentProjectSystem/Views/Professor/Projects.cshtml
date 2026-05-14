@@ -1,0 +1,90 @@
+@model IEnumerable<Project>
+@{ ViewData["Title"] = "Proiecte Studenți"; }
+
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <div class="input-group">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Caută după titlu sau student..." />
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </div>
+        <select name="status" class="form-control" onchange="this.form.submit()">
+            <option value="">Toate statusurile</option>
+            <option value="Submitted"   selected="@(ViewBag.Status == "Submitted")">Trimis</option>
+            <option value="UnderReview" selected="@(ViewBag.Status == "UnderReview")">În evaluare</option>
+            <option value="Graded"      selected="@(ViewBag.Status == "Graded")">Evaluat</option>
+            <option value="Archived"    selected="@(ViewBag.Status == "Archived")">Arhivat</option>
+        </select>
+        <select name="sort" class="form-control" onchange="this.form.submit()">
+            <option value="">Sortare: Dată</option>
+            <option value="title"   selected="@(ViewBag.Sort == "title")">Titlu</option>
+            <option value="student" selected="@(ViewBag.Sort == "student")">Student</option>
+            <option value="grade"   selected="@(ViewBag.Sort == "grade")">Notă</option>
+        </select>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>Niciun proiect găsit</h3>
+    </div>
+}
+else
+{
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Titlu</th>
+                    <th>Student</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Notă</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="cell-title">@p.Title</div>
+                        </td>
+                        <td>
+                            <div class="student-name"><i class="fas fa-user-graduate"></i> @p.Student?.FullName</div>
+                        </td>
+                        <td>@p.UploadDate.ToString("dd.MM.yyyy")</td>
+                        <td><span class="status-badge status-@p.Status.ToLower()">@p.Status</span></td>
+                        <td>
+                            @if (p.Grade != null)
+                            { <span class="grade-chip">@p.Grade.Score / 10</span> }
+                            else
+                            { <span class="text-muted">Neevaluat</span> }
+                        </td>
+                        <td class="actions-cell">
+                            <a asp-action="ProjectDetails" asp-route-id="@p.ProjectId" class="btn-icon" title="Detalii/Evaluare">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            @if (!p.IsArchived)
+                            {
+                                <form asp-action="ArchiveProject" method="post" style="display:inline"
+                                      onsubmit="return confirm('Arhivezi acest proiect?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.ProjectId" />
+                                    <button type="submit" class="btn-icon" title="Arhivează"><i class="fas fa-archive"></i></button>
+                                </form>
+                            }
+                            @if (p.FilePath != null)
+                            {
+                                <a asp-action="DownloadProject" asp-route-id="@p.ProjectId" class="btn-icon" title="Descarcă">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

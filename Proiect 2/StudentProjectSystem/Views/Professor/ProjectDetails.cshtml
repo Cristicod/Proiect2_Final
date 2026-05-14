@@ -1,0 +1,122 @@
+@model Project
+@{ ViewData["Title"] = "Detalii & Evaluare"; var gradeVm = (GradeProjectViewModel)ViewBag.GradeVm; }
+
+<div class="back-nav">
+    <a asp-action="Projects"><i class="fas fa-arrow-left"></i> Înapoi la proiecte</a>
+</div>
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header detail-header">
+                <div>
+                    <h2>@Model.Title</h2>
+                    <div class="detail-meta">
+                        <span><i class="fas fa-user-graduate"></i> @Model.Student?.FullName</span>
+                        <span><i class="fas fa-calendar"></i> @Model.UploadDate.ToString("dd MMMM yyyy")</span>
+                        @if (Model.Deadline.HasValue)
+                        { <span><i class="fas fa-hourglass-end"></i> Termen: @Model.Deadline.Value.ToString("dd.MM.yyyy")</span> }
+                    </div>
+                </div>
+                <span class="status-badge status-@Model.Status.ToLower() status-lg">@Model.Status</span>
+            </div>
+            <div class="card-body">
+                <h4>Descriere</h4>
+                <p class="description-text">@Model.Description</p>
+                @if (Model.FileName != null)
+                {
+                    <div class="file-attached">
+                        <i class="fas fa-paperclip"></i> @Model.FileName
+                        <a asp-action="DownloadProject" asp-route-id="@Model.ProjectId" class="btn btn-outline btn-xs ml-2">
+                            <i class="fas fa-download"></i> Descarcă
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-comments"></i> Comentarii (@Model.Comments.Count)</h3>
+            </div>
+            <div class="card-body">
+                @foreach (var c in Model.Comments.OrderBy(x => x.CreatedAt))
+                {
+                    <div class="comment-item">
+                        <div class="comment-avatar">@c.Author?.FullName?.FirstOrDefault()</div>
+                        <div class="comment-body">
+                            <div class="comment-header">
+                                <strong>@c.Author?.FullName</strong>
+                                <span class="comment-role role-@c.Author?.Role?.ToLower()">@c.Author?.Role</span>
+                                <time>@c.CreatedAt.ToString("dd.MM.yyyy HH:mm")</time>
+                            </div>
+                            <p>@c.Content</p>
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="AddComment" method="post" class="comment-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+                    <textarea name="Content" class="form-control" rows="3" placeholder="Adaugă un comentariu..." required></textarea>
+                    <button type="submit" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-paper-plane"></i> Trimite
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-sidebar">
+        <!-- Grade form -->
+        <div class="card grade-form-card">
+            <div class="card-header">
+                <h3><i class="fas fa-star"></i> @(Model.Grade != null ? "Modifică Nota" : "Acordă Notă")</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.Grade != null)
+                {
+                    <div class="current-grade">
+                        Nota curentă: <strong class="grade-value">@Model.Grade.Score / 10</strong>
+                    </div>
+                }
+                <form asp-action="GradeProject" asp-controller="Professor" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="@gradeVm.ProjectId" name="ProjectId" />
+                    <input type="hidden" name="ProjectTitle" value="@gradeVm.ProjectTitle" />
+                    <input type="hidden" name="StudentName" value="@gradeVm.StudentName" />
+
+                    <div class="form-group">
+                        <label>Notă (1-10)</label>
+                        <div class="grade-input-row">
+                            <input type="number" name="Score" value="@gradeVm.Score"
+                                   min="1" max="10" step="0.5" class="form-control grade-input" required />
+                            <span class="grade-max">/ 10</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Feedback</label>
+                        <textarea name="Feedback" class="form-control" rows="5"
+                                  placeholder="Oferă feedback constructiv studentului...">@gradeVm.Feedback</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-check"></i> @(Model.Grade != null ? "Actualizează nota" : "Salvează nota")
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        @if (Model.Grade != null)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <div class="grade-history-item">
+                        <div><small>Evaluat de</small><br /><strong>@Model.Grade.Professor?.FullName</strong></div>
+                        <div><small>Data</small><br />@Model.Grade.GradedAt.ToString("dd.MM.yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
