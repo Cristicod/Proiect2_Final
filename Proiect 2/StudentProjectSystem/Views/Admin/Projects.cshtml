@@ -1,0 +1,46 @@
+@model IEnumerable<Project>
+@{ ViewData["Title"] = "Toate Proiectele"; }
+
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <div class="input-group">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Caută proiect sau student..." />
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </div>
+    </form>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr><th>Titlu</th><th>Student</th><th>Data</th><th>Status</th><th>Notă</th><th>Acțiuni</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td><div class="cell-title">@p.Title</div></td>
+                    <td>@p.Student?.FullName</td>
+                    <td>@p.UploadDate.ToString("dd.MM.yyyy")</td>
+                    <td><span class="status-badge status-@p.Status.ToLower()">@p.Status</span></td>
+                    <td>
+                        @if (p.Grade != null)
+                        { <span class="grade-chip">@p.Grade.Score / 10</span> }
+                        else
+                        { <span class="text-muted">—</span> }
+                    </td>
+                    <td class="actions-cell">
+                        <form asp-action="DeleteProject" method="post" style="display:inline"
+                              onsubmit="return confirm('Ești sigur că vrei să ștergi proiectul @p.Title?')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p.ProjectId" />
+                            <button type="submit" class="btn-icon danger" title="Șterge">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

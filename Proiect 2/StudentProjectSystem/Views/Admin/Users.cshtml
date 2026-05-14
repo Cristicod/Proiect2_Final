@@ -1,0 +1,93 @@
+@model IEnumerable<User>
+@{ ViewData["Title"] = "Gestionare Utilizatori"; }
+
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <div class="input-group">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Caută utilizator..." />
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </div>
+        <select name="role" class="form-control" onchange="this.form.submit()">
+            <option value="">Toate rolurile</option>
+            <option value="Student"   selected="@(ViewBag.Role == "Student")">Student</option>
+            <option value="Professor" selected="@(ViewBag.Role == "Professor")">Profesor</option>
+            <option value="Admin"     selected="@(ViewBag.Role == "Admin")">Admin</option>
+        </select>
+    </form>
+    <a asp-action="CreateUser" class="btn btn-primary"><i class="fas fa-user-plus"></i> Utilizator nou</a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nume</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Status</th>
+                <th>Creat</th>
+                <th>Acțiuni</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr class="@(u.IsActive ? "" : "row-inactive")">
+                    <td><strong>@u.FullName</strong></td>
+                    <td>@u.Email</td>
+                    <td><span class="badge-role badge-@u.Role.ToLower()">@u.Role</span></td>
+                    <td>
+                        @if (u.IsActive)
+                        { <span class="status-badge status-graded">Activ</span> }
+                        else
+                        { <span class="status-badge status-archived">Inactiv</span> }
+                    </td>
+                    <td>@u.CreatedAt.ToString("dd.MM.yyyy")</td>
+                    <td class="actions-cell">
+                        <form asp-action="ToggleUser" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@u.UserId" />
+                            <button type="submit" class="btn-icon @(u.IsActive ? "danger" : "success")"
+                                    title="@(u.IsActive ? "Dezactivează" : "Activează")"
+                                    onclick="return confirm('@(u.IsActive ? "Dezactivezi" : "Activezi") contul @u.FullName?')">
+                                <i class="fas fa-@(u.IsActive ? "user-slash" : "user-check")"></i>
+                            </button>
+                        </form>
+                        <button type="button" class="btn-icon" style="color: var(--primary);" title="Schimbă parola" onclick="openPasswordModal(@u.UserId, '@u.FullName')">
+                            <i class="fas fa-key"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal pentru Schimbare Parola -->
+<div id="passwordModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <h3 id="modalTitle">Schimbă parola</h3>
+        <form asp-action="ChangeUserPassword" method="post" id="passwordForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="modalUserId" />
+            <input type="password" name="newPassword" class="form-control" placeholder="Parolă nouă (minim 6 caractere)" required minlength="6" />
+            <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Anulează</button>
+                <button type="submit" class="btn btn-primary">Salvează</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openPasswordModal(userId, userName) {
+            document.getElementById('modalTitle').innerText = 'Schimbă parola pentru ' + userName;
+            document.getElementById('modalUserId').value = userId;
+            document.getElementById('passwordModal').style.display = 'flex';
+        }
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+    </script>
+}

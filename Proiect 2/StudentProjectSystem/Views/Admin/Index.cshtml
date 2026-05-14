@@ -1,0 +1,87 @@
+@model AdminDashboardViewModel
+@{ ViewData["Title"] = "Dashboard Administrator"; }
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.TotalStudents</div>
+            <div class="stat-label">Studenți</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.TotalProfessors</div>
+            <div class="stat-label">Profesori</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-folder"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.TotalProjects</div>
+            <div class="stat-label">Total Proiecte</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">@Model.PendingProjects</div>
+            <div class="stat-label">Nevaldate</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-grid">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-shield-alt"></i> Activitate recentă</h3>
+            <a asp-action="Logs" class="btn btn-outline btn-xs">Toate logurile</a>
+        </div>
+        <div class="card-body p-0">
+            <table class="data-table">
+                <thead><tr><th>Acțiune</th><th>Utilizator</th><th>Data</th></tr></thead>
+                <tbody>
+                    @foreach (var log in Model.RecentLogs)
+                    {
+                        <tr>
+                            <td><span class="log-action">@log.Action</span></td>
+                            <td>@(log.User?.FullName ?? "System")</td>
+                            <td>@log.CreatedAt.ToString("dd.MM HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-user-plus"></i> Utilizatori recenți</h3>
+            <a asp-action="CreateUser" class="btn btn-primary btn-xs"><i class="fas fa-plus"></i> Nou</a>
+        </div>
+        <div class="card-body p-0">
+            <table class="data-table">
+                <thead><tr><th>Nume</th><th>Rol</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var u in Model.RecentUsers)
+                    {
+                        <tr>
+                            <td>
+                                <div class="cell-title">@u.FullName</div>
+                                <div class="cell-sub">@u.Email</div>
+                            </td>
+                            <td><span class="badge-role badge-@u.Role.ToLower()">@u.Role</span></td>
+                            <td>
+                                @if (u.IsActive)
+                                { <span class="status-badge status-graded">Activ</span> }
+                                else
+                                { <span class="status-badge status-archived">Inactiv</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
