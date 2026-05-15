@@ -1,0 +1,19 @@
+// UniProjects – site.js
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const main    = document.getElementById('main');
+    if (sidebar) sidebar.classList.toggle('open');
+}
+
+// Auto-dismiss alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function () {
+    const alerts = document.querySelectorAll('.alert-success, .alert-danger');
+    alerts.forEach(function (alert) {
+        setTimeout(function () {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function () { alert.remove(); }, 500);
+        }, 5000);
+    });
+});

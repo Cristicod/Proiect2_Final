@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UniProjects</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+    var name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
+    var initials = string.Join("", name.Split(' ').Take(2).Select(w => w.FirstOrDefault().ToString().ToUpper()));
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>UniProjects</span>
+            </div>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            @if (role == "Student")
+            {
+                <a asp-controller="Student" asp-action="Index"    class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Student" ? "active" : "")"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a asp-controller="Student" asp-action="Projects" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Projects" ? "active" : "")"><i class="fas fa-folder-open"></i><span>Proiectele mele</span></a>
+                <a asp-controller="Student" asp-action="Upload"   class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Upload" ? "active" : "")"><i class="fas fa-upload"></i><span>Încarcă proiect</span></a>
+                <a asp-controller="Student" asp-action="Notifications" class="nav-link"><i class="fas fa-bell"></i><span>Notificări</span></a>
+            }
+            else if (role == "Professor")
+            {
+                <a asp-controller="Professor" asp-action="Index"    class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a asp-controller="Professor" asp-action="Projects" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Projects" ? "active" : "")"><i class="fas fa-list-check"></i><span>Proiecte studenți</span></a>
+                <a asp-controller="Professor" asp-action="Notifications" class="nav-link"><i class="fas fa-bell"></i><span>Notificări</span></a>
+            }
+            else if (role == "Admin")
+            {
+                <a asp-controller="Admin" asp-action="Index"    class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+                <a asp-controller="Admin" asp-action="Users"    class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")"><i class="fas fa-users"></i><span>Utilizatori</span></a>
+                <a asp-controller="Admin" asp-action="Projects" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Projects" ? "active" : "")"><i class="fas fa-folder"></i><span>Proiecte</span></a>
+                <a asp-controller="Admin" asp-action="Logs"     class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Logs" ? "active" : "")"><i class="fas fa-shield-alt"></i><span>Jurnale audit</span></a>
+            }
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar">@initials</div>
+                <div class="user-details">
+                    <div class="user-name">@name</div>
+                    <div class="user-role">@role</div>
+                </div>
+            </div>
+            <div class="sidebar-actions">
+                <a asp-controller="Account" asp-action="ChangePassword" title="Schimbă parola"><i class="fas fa-key"></i></a>
+                <a asp-controller="Account" asp-action="Logout" title="Deconectare"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content" id="main">
+        <div class="topbar">
+            <button class="sidebar-toggle-mobile" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="page-title">@(ViewData["Title"] ?? "Dashboard")</h1>
+            <div class="topbar-right">
+                <span class="badge-role badge-@role.ToLower()">@role</span>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @TempData["Error"]</div>
+        }
+
+        <div class="content-area">
+            @RenderBody()
+        </div>
+    </main>
+}
+else
+{
+    @RenderBody()
+}
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
